@@ -1,0 +1,42 @@
+{
+  "name": "pretty-remarkable",
+  "description": "Plugin for prettifying markdown using remarkable and custom renderer rules.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/pretty-remarkable",
+  "author": {
+    "name": "Jon Schlinkert",
+    "url": "https://github.com/jonschlinkert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jonschlinkert/pretty-remarkable.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/pretty-remarkable/issues"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/jonschlinkert/pretty-remarkable/blob/master/LICENSE"
+  },
+  "files": [
+    "index.js"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "extend-shallow": "^1.1.2",
+    "list-item": "^0.1.2",
+    "remarkable": "^1.6.0",
+    "repeat-string": "^1.5.2"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "keywords": []
+}

@@ -1,0 +1,30 @@
+var fs = require('fs');
+var prettify = require('./');
+var Remarkable = require('remarkable');
+
+/**
+ * Load `format` as a remarkable plugin and
+ * expose the `pretty` function.
+ *
+ * @param  {String} `str` String of markdown
+ * @param  {Object} `options`
+ * @return {String} Markdown-formatted table of contents
+ */
+
+function pretty(str, options) {
+  return new Remarkable()
+    .use(prettify)
+    .render(str);
+}
+
+function read(name) {
+  return fs.readFileSync('fixtures/' + name + '.md', 'utf8');
+}
+var md = new Remarkable();
+md.use(prettify);
+var result = md.render('\n\n\n# foo\n\n\nbar\n# baz');
+console.log(result);
+// console.log(pretty(read('example')));
+// console.log(pretty(read('blockquotes')));
+// console.log(pretty(read('emphasis')));
+// console.log(pretty(read('table')));
