@@ -1,7 +1,9 @@
 'use strict';
 
+var mdu = require('markdown-utils');
+var extend = require('extend-shallow');
 var repeat = require('repeat-string');
-var li = require('list-item')();
+var li = require('list-item');
 
 /**
  * Local dependencies
@@ -17,7 +19,12 @@ var escapeHtml      = require(utils).escapeHtml;
  * Renderer rules cache
  */
 
-var rules = {inside: {}};
+var rules = {inside: {}, badges: [], links: [], images: []};
+rules.count = {
+  badges: 0,
+  images: 0,
+  links: 0,
+};
 
 /**
  * Blockquotes
@@ -114,10 +121,25 @@ rules.bullet_list_close = function (tokens, idx /*, options, env */) {
  * List items
  */
 
-rules.list_item_open = function (tokens, idx/*,options, env */) {
+rules.list_item_open = function (tokens, idx, options/*, env */) {
+  var opts = extend({chars: ['*', '-', '+', '~']}, options);
+  var username = new RegExp('(?:github|twitter)/' + opts.username + ']');
+  var name = opts.name;
   var token = tokens[idx];
+
+  // get the last content before the list item
+  var prev = tokens[idx - 3];
+  var next = tokens[idx + 2];
   var lvl = token.level - 1;
-  return li(lvl > 0 ? (lvl / 2) : 0, '');
+
+  // create a visual break when the bullets are urls to the author's
+  // github or twitter links
+  var special = prev && prev.content.indexOf(name) !== -1 || username.test(next.content);
+  if (special) {
+    opts = {chars: ['+', '-', '*', '~']};
+    return li(opts)(lvl > 0 ? (lvl / 2) : 0, '');
+  }
+  return li(opts)(lvl > 0 ? (lvl / 2) : 0, '');
 };
 rules.list_item_close = function (tokens, idx/*,options, env */) {
   return getBreak(tokens, idx);
@@ -141,13 +163,18 @@ rules.ordered_list_close = function (tokens, idx /*, options, env */) {
  */
 
 rules.paragraph_open = function (tokens, idx /*, options, env */) {
-  return tokens[idx].tight ? '' : '\n';
+  var token = tokens[idx];
+  var next = tokens[idx + 1];
+  var prev = tokens[idx - 1];
+  if (prev && prev.type === 'blockquote_open') {
+    return '';
+  }
+  return token.tight ? '' : '\n';
 };
 rules.paragraph_close = function (tokens, idx /*, options, env */) {
   var next = tokens[idx + 1];
   var prev = tokens[idx - 1];
   var token = tokens[idx];
-
   if (next && next.type.indexOf('paragraph') === -1) {
     return token.tight ? '' : '\n' + getBreak(tokens, idx);
   }
@@ -160,11 +187,25 @@ rules.paragraph_close = function (tokens, idx /*, options, env */) {
  */
 
 rules.link_open = function (tokens, idx /*, options, env */) {
-  var title = tokens[idx].title ? (' title="' + replaceEntities(tokens[idx].title) + '"') : '';
-  return '<a href="' + escapeHtml(tokens[idx].href) + '"' + title + '>';
+  var token = tokens[idx];
+  rules.links.push(token);
+  rules.count.links++;
+
+  var next = tokens[idx + 1];
+  var title = token.title ? token.title : '';
+
+  if (next && next.type === 'text') {
+    title = next.content;
+  }
+  if (token.href.indexOf('badge') !== -1 || next && next.type === 'image') {
+    rules.count.badges++;
+    rules.badges.push(token);
+    return '';
+  }
+  return '[' + title + '](' + token.href + ')';
 };
 rules.link_close = function (tokens, idx/* , options, env */) {
-  return '</a>';
+  return '';
 };
 
 /**
@@ -172,11 +213,26 @@ rules.link_close = function (tokens, idx/* , options, env */) {
  */
 
 rules.image = function (tokens, idx, options /*, env */) {
-  var src = ' src="' + escapeHtml(tokens[idx].src) + '"';
-  var title = tokens[idx].title ? (' title="' + tokens[idx].title + '"') : '';
-  var alt = ' alt="' + (tokens[idx].alt ? escapeHtml(replaceEntities(tokens[idx].alt)) : '') + '"';
-  var suffix = options.xhtmlOut ? ' /' : '';
-  return '<img' + src + alt + title + suffix + '>';
+  var token = tokens[idx];
+  rules.images.push(token);
+  rules.count.images++;
+  var link = rules.links[rules.count.images - 1];
+
+  var src = token.src || '';
+  var title = token.title || '';
+  var alt = token.alt || '';
+  if (link || (token.src && token.src.indexOf('badge')) !== -1) {
+    if (link && link.href) {
+      return mdu.badge(alt, src, link.href);
+    }
+
+    var url = src;
+    if (/\.(svg|jpg|png)/.test(url)) {
+      url = url.slice(0, url.length - 4);
+    }
+    return mdu.badge(alt, src, url);
+  }
+  return mdu.image(alt, src, title);
 };
 
 /**
@@ -347,6 +403,10 @@ rules.softbreak = function (tokens, idx, options /*, env */) {
  */
 
 rules.text = function (tokens, idx /*, options, env */) {
+  var prev = tokens[idx - 1];
+  if (prev && prev.type === 'link_open') {
+    return '';
+  }
   return tokens[idx].content;
 };
 
