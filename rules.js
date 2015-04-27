@@ -134,7 +134,9 @@ rules.list_item_open = function (tokens, idx, options/*, env */) {
 
   // create a visual break when the bullets are urls to the author's
   // github or twitter links
-  var special = prev && prev.content.indexOf(name) !== -1 || username.test(next.content);
+  var special = (prev && prev.content && prev.content.indexOf(name) !== -1)
+    || username.test(next.content);
+
   if (special) {
     opts = {chars: ['+', '-', '*', '~']};
     return li(opts)(lvl > 0 ? (lvl / 2) : 0, '');
@@ -175,7 +177,7 @@ rules.paragraph_close = function (tokens, idx /*, options, env */) {
   var next = tokens[idx + 1];
   var prev = tokens[idx - 1];
   var token = tokens[idx];
-  if (next && next.type.indexOf('paragraph') === -1) {
+  if (next && next.type && next.type.indexOf('paragraph') === -1) {
     return token.tight ? '' : '\n' + getBreak(tokens, idx);
   }
   var addBreak = !(token.tight && idx && prev.type === 'inline' && !prev.content);
@@ -197,7 +199,7 @@ rules.link_open = function (tokens, idx /*, options, env */) {
   if (next && next.type === 'text') {
     title = next.content;
   }
-  if (token.href.indexOf('badge') !== -1 || next && next.type === 'image') {
+  if ((token.href && token.href.indexOf('badge') !== -1) || next && next.type === 'image') {
     rules.count.badges++;
     rules.badges.push(token);
     return '';
