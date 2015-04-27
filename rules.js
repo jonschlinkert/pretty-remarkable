@@ -141,7 +141,7 @@ rules.ordered_list_close = function (tokens, idx /*, options, env */) {
  */
 
 rules.paragraph_open = function (tokens, idx /*, options, env */) {
-  return tokens[idx].tight ? '' : '';
+  return tokens[idx].tight ? '' : '\n';
 };
 rules.paragraph_close = function (tokens, idx /*, options, env */) {
   var next = tokens[idx + 1];
@@ -254,14 +254,26 @@ rules.td_close = function (tokens, idx/* , options, env */) {
  */
 
 rules.strong_open = function (tokens, idx/* , options, env */) {
-  var token = tokens[idx];
-  return '**';
+  rules.inside.strong = {};
+  var prev = tokens[idx - 1];
+  var res = '';
+
+  if (prev && prev.type === 'softbreak') {
+    res += '\n';
+  }
+  rules.inside.strong.prev = prev;
+  res += '**';
+  return res;
 };
 rules.strong_close = function (tokens, idx/* , options, env */) {
-  if (rules.inside.th) {
+  var prev = rules.inside.strong.prev;
+  // if it's not a "heading", or it's inside a table heading
+  if (prev && prev.type === 'text' || rules.inside.th) {
     return '**';
   }
-  return detectBreak(tokens, idx, '**');
+  var res = detectBreak(tokens, idx, '**');
+  rules.inside.strong = null;
+  return res;
 };
 
 /**
@@ -454,10 +466,11 @@ var getBreak = rules.getBreak = function getBreak(tokens, idx) {
 };
 
 function detectBreak(tokens, idx, ch) {
-  var token = tokens[idx + 1];
+  var next = tokens[idx + 1];
+  var after = tokens[idx + 2];
   var res = ch;
-  if (!token || token.type === 'softbreak') {
-    res += '\n'
+  if (!next || next.type === 'softbreak') {
+    res += '\n';
   }
   return res;
 }
