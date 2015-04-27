@@ -8,16 +8,30 @@
 'use strict';
 
 /* deps:mocha */
+var fs = require('fs');
 var assert = require('assert');
 var should = require('should');
 var Remarkable = require('remarkable');
 var prettify = require('./');
 
+/**
+ * test utils
+ */
 function pretty(str, options) {
   return new Remarkable()
     .use(prettify)
     .render(str);
 }
+function read(dir, name) {
+  return fs.readFileSync(dir + '/' + name + '.md', 'utf8');
+}
+function fixture(name) {
+  return read('fixtures', name);
+}
+function expected(name) {
+  return read('expected', name);
+}
+
 
 describe('prettify', function () {
   describe('newlines', function () {
@@ -64,6 +78,16 @@ describe('prettify', function () {
     it('should format badges:', function () {
       var str = '[![foo](https://a.b.c.svg)](http://a.b.c)';
       pretty(str).should.equal('[![foo](https://a.b.c.svg)](http://a.b.c)');
+    });
+  });
+
+  describe('lists', function () {
+    it('should format unordered lists:', function () {
+      pretty(fixture('ul')).should.equal(expected('ul'));
+    });
+
+    it('should format ordered lists:', function () {
+      pretty(fixture('ol')).should.equal(expected('ol'));
     });
   });
 });
