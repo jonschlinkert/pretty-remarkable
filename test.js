@@ -59,4 +59,11 @@ describe('prettify', function () {
       pretty('one **two** three\nbar').should.equal('one **two** three\nbar');
     });
   });
+
+  describe('badges', function () {
+    it('should format badges:', function () {
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c)';
+      pretty(str).should.equal('[![foo](https://a.b.c.svg)](http://a.b.c)');
+    });
+  });
 });
