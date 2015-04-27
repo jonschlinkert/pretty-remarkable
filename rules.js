@@ -1,7 +1,6 @@
 'use strict';
 
 var mdu = require('markdown-utils');
-var extend = require('extend-shallow');
 var repeat = require('repeat-string');
 var li = require('list-item');
 
@@ -9,17 +8,20 @@ var li = require('list-item');
  * Local dependencies
  */
 
-var utils           = 'remarkable/lib/common/utils';
-var has             = require(utils).has;
-var unescapeMd      = require(utils).unescapeMd;
-var replaceEntities = require(utils).replaceEntities;
-var escapeHtml      = require(utils).escapeHtml;
+var utils = 'remarkable/lib/common/utils';
+var has   = require(utils).has;
 
 /**
  * Renderer rules cache
  */
 
-var rules = {inside: {}, badges: [], links: [], images: []};
+var rules = {
+  list: {ordered: false, num: 1},
+  inside: {},
+  badges: [],
+  links: [],
+  images: []
+};
 rules.count = {
   badges: 0,
   images: 0,
@@ -30,12 +32,12 @@ rules.count = {
  * Blockquotes
  */
 
-rules.blockquote_open = function (tokens, idx /*, options, env */) {
+rules.blockquote_open = function (/*tokens, idx, options, env */) {
   return '> ';
 };
 
-rules.blockquote_close = function (tokens, idx /*, options, env */) {
-  return ''
+rules.blockquote_close = function (/*tokens, idx, options, env */) {
+  return '';
 };
 
 /**
@@ -54,14 +56,9 @@ rules.code = function (tokens, idx /*, options, env */) {
  */
 
 rules.fence = function (tokens, idx, options, env, self) {
-  var token = tokens[idx];
-  var langClass = '';
-  var langPrefix = options.langPrefix;
-  var langName = '', fenceName;
-  var highlighted;
+  var token = tokens[idx], fenceName;
 
   if (token.params) {
-
     //
     // ```foo bar
     //
@@ -110,10 +107,24 @@ rules.hr = function (tokens, idx) {
  * Bullets
  */
 
-rules.bullet_list_open = function (tokens, idx/*,options, env */) {
-  return '';
+rules.bullet_list_open = function (/*tokens, idx, options, env */) {
+  rules.list.ordered = false;
+  return '\n';
 };
 rules.bullet_list_close = function (tokens, idx /*, options, env */) {
+  return getBreak(tokens, idx);
+};
+
+/**
+ * Ordered list items
+ */
+
+rules.ordered_list_open = function (/*tokens, idx, options, env */) {
+  rules.list.ordered = true;
+  return '\n';
+};
+rules.ordered_list_close = function (tokens, idx /*, options, env */) {
+  rules.list.num = 1;
   return getBreak(tokens, idx);
 };
 
@@ -122,41 +133,44 @@ rules.bullet_list_close = function (tokens, idx /*, options, env */) {
  */
 
 rules.list_item_open = function (tokens, idx, options/*, env */) {
-  var opts = extend({chars: ['*', '-', '+', '~']}, options);
-  var username = new RegExp('(?:github|twitter)/' + opts.username + ']');
-  var name = opts.name;
+  options = options || {};
+  // tokens
   var token = tokens[idx];
+  var prev = tokens[idx - 3] || {};
+  var next = tokens[idx + 2] || {};
+  var level = lvl(token.level);
 
-  // get the last content before the list item
-  var prev = tokens[idx - 3];
-  var next = tokens[idx + 2];
-  var lvl = token.level - 1;
+  if (next.children && next.children.length > 1) {
+    for (var i = 1; i < next.children.length; i++) {
+      var child = next.children[i];
+      if (child.content && /^[-\w]{1,2}\./.test(child.content)) {
+        var prefix = repeat(' ', level + 2);
+        tokens[idx + 2].children[i].content = (prefix + child.content);
+        tokens[idx + 2].children[i].level = level + 2;
+      }
+    }
+  }
+
+  // list info
+  var ordered = rules.list.ordered;
+  var username = new RegExp('(?:github|twitter)/' + options.username + ']');
+  var name = options.name;
 
   // create a visual break when the bullets are urls to the author's
   // github or twitter links
-  var special = (prev && prev.content && prev.content.indexOf(name) !== -1)
-    || username.test(next.content);
+  var special = !ordered && ((prev.content && prev.content.indexOf(name) !== -1)
+    || (next.content && username.test(next.content)));
 
+  options.chars = ['*', '-', '+', '~'];
   if (special) {
-    opts = {chars: ['+', '-', '*', '~']};
-    return li(opts)(lvl > 0 ? (lvl / 2) : 0, '');
+    options.chars = ['+', '-', '*', '~'];
   }
-  return li(opts)(lvl > 0 ? (lvl / 2) : 0, '');
+  if (ordered) {
+    options.chars = (rules.list.num++) + '.';
+  }
+  return li(options)(level, '');
 };
 rules.list_item_close = function (tokens, idx/*,options, env */) {
-  return getBreak(tokens, idx);
-};
-
-/**
- * Ordered list items
- */
-
-rules.ordered_list_open = function (tokens, idx /*, options, env */) {
-  var token = tokens[idx];
-  var lvl = token.level - 1;
-  return li(lvl > 0 ? (lvl / 2) : 0, '');
-};
-rules.ordered_list_close = function (tokens, idx /*, options, env */) {
   return getBreak(tokens, idx);
 };
 
@@ -166,7 +180,6 @@ rules.ordered_list_close = function (tokens, idx /*, options, env */) {
 
 rules.paragraph_open = function (tokens, idx /*, options, env */) {
   var token = tokens[idx];
-  var next = tokens[idx + 1];
   var prev = tokens[idx - 1];
   if (prev && prev.type === 'blockquote_open') {
     return '';
@@ -206,7 +219,7 @@ rules.link_open = function (tokens, idx /*, options, env */) {
   }
   return '[' + title + '](' + token.href + ')';
 };
-rules.link_close = function (tokens, idx/* , options, env */) {
+rules.link_close = function (/*tokens, idx, options, env */) {
   return '';
 };
 
@@ -214,7 +227,7 @@ rules.link_close = function (tokens, idx/* , options, env */) {
  * Images
  */
 
-rules.image = function (tokens, idx, options /*, env */) {
+rules.image = function (tokens, idx/*, options, env */) {
   var token = tokens[idx];
   rules.images.push(token);
   rules.count.images++;
@@ -241,66 +254,55 @@ rules.image = function (tokens, idx, options /*, env */) {
  * Tables
  */
 
-rules.table_open = function (tokens, idx/* , options, env */) {
+rules.table_open = function (/*tokens, idx, options, env */) {
   rules.insideTable = true;
   return '';
 };
-rules.table_close = function (tokens, idx/* , options, env */) {
+rules.table_close = function (/*tokens, idx, options, env */) {
   return '\n';
 };
-rules.thead_open = function (tokens, idx/* , options, env */) {
+rules.thead_open = function (/*tokens, idx, options, env */) {
   rules.inside.thead = true;
   return '';
 };
-rules.thead_close = function (tokens, idx/* , options, env */) {
+rules.thead_close = function (/*tokens, idx, options, env */) {
   rules.inside.thead = false;
   return '';
 };
-rules.tbody_open = function (tokens, idx/* , options, env */) {
+rules.tbody_open = function (/*tokens, idx, options, env */) {
   rules.inside.tbody = true;
   return '';
 };
-rules.tbody_close = function (tokens, idx/* , options, env */) {
+rules.tbody_close = function (/*tokens, idx, options, env */) {
   return '';
 };
-rules.tr_open = function (tokens, idx/* , options, env */) {
+rules.tr_open = function (/*tokens, idx, options, env */) {
   rules.inside.tr = true;
-  var next = tokens[idx + 1];
-
   return '| ';
 };
-rules.tr_close = function (tokens, idx/* , options, env */) {
+rules.tr_close = function (/*tokens, idx, options, env */) {
   rules.inside.tr = false;
-  var next = tokens[idx + 1];
   return '\n';
 };
 var align = [];
 rules.th_open = function (tokens, idx /*, options, env */) {
   rules.inside.th = true;
   var token = tokens[idx];
-  var next = tokens[idx + 1];
   if (rules.inside.tr) {
     align.push(token.align);
   }
   return '';
 };
-rules.th_close = function (tokens, idx/* , options, env */) {
+rules.th_close = function (/*tokens, idx, options, env */) {
   rules.inside.th = false;
-  var next = tokens[idx + 1];
   return ' | ';
 };
-rules.td_open = function (tokens, idx /*, options, env */) {
-  var token = tokens[idx];
-  var prev = tokens[idx - 1];
-  if (prev && prev.type === 'tr_open') {
-    return '';
-  }
+rules.td_open = function (/*tokens, idx, options, env */) {
   // return token.align;
   return ' | ';
 };
 rules.td_close = function (tokens, idx/* , options, env */) {
   var next = tokens[idx + 1];
-  var prev = tokens[idx - 1];
   if (next && next.type === 'tr_close') {
     return ' |';
   }
@@ -338,7 +340,7 @@ rules.strong_close = function (tokens, idx/* , options, env */) {
  * Italicize
  */
 
-rules.em_open = function (tokens, idx/* , options, env */) {
+rules.em_open = function (/*tokens, idx, options, env */) {
   return '_';
 };
 rules.em_close = function (tokens, idx/* , options, env */) {
@@ -349,7 +351,7 @@ rules.em_close = function (tokens, idx/* , options, env */) {
  * Strikethrough
  */
 
-rules.del_open = function (tokens, idx/* , options, env */) {
+rules.del_open = function (/*tokens, idx, options, env */) {
   return '~~';
 };
 rules.del_close = function (tokens, idx/* , options, env */) {
@@ -360,10 +362,10 @@ rules.del_close = function (tokens, idx/* , options, env */) {
  * Insert
  */
 
-rules.ins_open = function (tokens, idx/* , options, env */) {
+rules.ins_open = function (/*tokens, idx, options, env */) {
   return '<ins>';
 };
-rules.ins_close = function (tokens, idx/* , options, env */) {
+rules.ins_close = function (/*tokens, idx, options, env */) {
   return '</ins>';
 };
 
@@ -371,10 +373,10 @@ rules.ins_close = function (tokens, idx/* , options, env */) {
  * Highlight
  */
 
-rules.mark_open = function (tokens, idx/* , options, env */) {
+rules.mark_open = function (/*tokens, idx, options, env */) {
   return '<mark>';
 };
-rules.mark_close = function (tokens, idx/* , options, env */) {
+rules.mark_close = function (/*tokens, idx, options, env */) {
   return '</mark>';
 };
 
@@ -393,10 +395,10 @@ rules.sup = function (tokens, idx /*, options, env */) {
  * Breaks
  */
 
-rules.hardbreak = function (tokens, idx, options /*, env */) {
+rules.hardbreak = function (/*tokens, idx, options, env */) {
   return '\n\n';
 };
-rules.softbreak = function (tokens, idx, options /*, env */) {
+rules.softbreak = function (/*tokens, idx, options, env */) {
   return '\n';
 };
 
@@ -430,7 +432,7 @@ rules.htmltag = function (tokens, idx /*, options, env */) {
 rules.abbr_open = function (tokens, idx /*, options, env */) {
   return '<abbr title="' + tokens[idx].title + '">';
 };
-rules.abbr_close = function (tokens, idx/* , options, env */) {
+rules.abbr_close = function (/*tokens, idx, options, env */) {
   return '</abbr>';
 };
 
@@ -529,12 +531,17 @@ var getBreak = rules.getBreak = function getBreak(tokens, idx) {
 
 function detectBreak(tokens, idx, ch) {
   var next = tokens[idx + 1];
-  var after = tokens[idx + 2];
   var res = ch;
   if (!next || next.type === 'softbreak') {
     res += '\n';
   }
   return res;
+}
+
+function lvl(level) {
+  if (typeof level === 'undefined') return null;
+  level = level - 1;
+  return level > 0 ? (level / 2) : 0;
 }
 
 /**
