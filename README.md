@@ -1,6 +1,6 @@
 # pretty-remarkable [![NPM version](https://badge.fury.io/js/pretty-remarkable.svg)](http://badge.fury.io/js/pretty-remarkable)
 
-> Plugin for prettifying markdown with remarkable and custom renderer rules.
+> Plugin for prettifying markdown with Remarkable using custom renderer rules.
 
 Still a work in progress. [Pull requests welcome](https://github.com/jonschlinkert/pretty-remarkable/issues).
 
