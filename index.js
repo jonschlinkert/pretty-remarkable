@@ -31,28 +31,28 @@ function prettify(md) {
   md.renderer.renderInline = function (tokens, options, env) {
     var _rules = rules;
     var len = tokens.length, i = 0;
-    var result = '';
+    var str = '';
 
     while (len--) {
-      result += _rules[tokens[i].type](tokens, i++, options, env, this);
+      str += _rules[tokens[i].type](tokens, i++, options, env, this);
     }
-    return result;
+    return str;
   };
 
   md.renderer.render = function (tokens, options, env) {
     var _rules = rules;
     var len = tokens.length, i = -1;
-    var result = '';
+    var str = '';
 
     while (++i < len) {
       if (tokens[i].type === 'inline') {
-        result += this.renderInline(tokens[i].children, options, env);
+        str += this.renderInline(tokens[i].children, options, env);
       } else {
-        result += _rules[tokens[i].type](tokens, i, options, env, this);
+        str += _rules[tokens[i].type](tokens, i, options, env, this);
       }
     }
-    result = result.split(/(?:\r\n|\n){2,}/).join('\n\n');
-    return result;
+    str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
+    return str.trim();
   };
 }
 
