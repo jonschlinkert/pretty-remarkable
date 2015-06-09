@@ -64,6 +64,17 @@ describe('prettify', function () {
       var str = 'a\n```\nvar foo = "bar";\n```\nb';
       pretty(str).should.equal('a\n\n```\nvar foo = "bar";\n```\n\nb');
     });
+
+    it('should remove leading lines inside gfm code blocks:', function () {
+      var str = 'a\n```\n\n\n     var foo = "bar";\n```\nb';
+      pretty(str).should.equal('a\n\n```\n     var foo = "bar";\n```\n\nb');
+    });
+
+    // see: https://github.com/jonschlinkert/pretty-remarkable/issues/2
+    it('should not remove leading whitespace on the first gfm code line:', function () {
+      var str = 'a\n```\n     var foo = "bar";\n```\nb';
+      pretty(str).should.equal('a\n\n```\n     var foo = "bar";\n```\n\nb');
+    });
   });
 
   describe('strong', function () {

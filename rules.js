@@ -70,9 +70,12 @@ rules.fence = function (tokens, idx, options, env, self) {
       return self.rules.fence_custom[fenceName](tokens, idx, options, env, self);
     }
   }
+
+  token.content = token.content.split('\n').filter(Boolean);
+
   var res = '\n';
   res += '```' + (fenceName || '') + '\n';
-  res += token.content.trim() + '\n';
+  res += token.content + '\n';
   res += '```\n';
   res += getBreak(tokens, idx);
   return res;
