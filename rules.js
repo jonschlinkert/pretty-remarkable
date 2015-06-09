@@ -71,7 +71,7 @@ rules.fence = function (tokens, idx, options, env, self) {
     }
   }
 
-  token.content = token.content.split('\n').filter(Boolean);
+  token.content = token.content.split('\n').filter(Boolean).join('\n');
 
   var res = '\n';
   res += '```' + (fenceName || '') + '\n';

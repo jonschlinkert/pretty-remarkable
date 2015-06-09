@@ -1,7 +1,7 @@
 {
   "name": "pretty-remarkable",
   "description": "Plugin for prettifying markdown with Remarkable using custom renderer rules.",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "homepage": "https://github.com/jonschlinkert/pretty-remarkable",
   "author": {
     "name": "Jon Schlinkert",
