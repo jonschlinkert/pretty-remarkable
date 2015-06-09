@@ -58,6 +58,12 @@ describe('prettify', function () {
       var str = 'a\n```js\nvar foo = "bar";\n```\nb';
       pretty(str).should.equal('a\n\n```js\nvar foo = "bar";\n```\n\nb');
     });
+
+    // see: https://github.com/jonschlinkert/pretty-remarkable/issues/1
+    it('should properly handle undefined language after code fence:', function () {
+      var str = 'a\n```\nvar foo = "bar";\n```\nb';
+      pretty(str).should.equal('a\n\n```\nvar foo = "bar";\n```\n\nb');
+    });
   });
 
   describe('strong', function () {

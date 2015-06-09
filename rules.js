@@ -75,7 +75,7 @@ rules.fence = function (tokens, idx, options, env, self) {
     }
   }
   var res = '\n';
-  res += '```' + fenceName + '\n';
+  res += '```' + (fenceName || '') + '\n';
   res += token.content.trim() + '\n';
   res += '```\n';
   res += getBreak(tokens, idx);
