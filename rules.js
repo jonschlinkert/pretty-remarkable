@@ -1,15 +1,11 @@
 'use strict';
 
-var mdu = require('markdown-utils');
-var repeat = require('repeat-string');
-var li = require('list-item');
-
-/**
- * Local dependencies
- */
-
-var utils = 'remarkable/lib/common/utils';
-var has   = require(utils).has;
+/* deps: list-item markdown-utils repeat-string */
+var lazy = require('lazy-cache')(require);
+var mdu = lazy('markdown-utils');
+var repeat = lazy('repeat-string');
+var li = lazy('list-item');
+var has = require('remarkable/lib/common/utils').has;
 
 /**
  * Renderer rules cache
@@ -20,12 +16,12 @@ var rules = {
   inside: {},
   badges: [],
   links: [],
-  images: []
-};
-rules.count = {
-  badges: 0,
-  images: 0,
-  links: 0,
+  images: [],
+  count: {
+    badges: 0,
+    images: 0,
+    links: 0,
+  }
 };
 
 /**
@@ -89,7 +85,7 @@ rules.fence_custom = {};
  */
 
 rules.heading_open = function (tokens, idx /*, options, env */) {
-  return repeat('#', tokens[idx].hLevel) + ' ';
+  return repeat()('#', tokens[idx].hLevel) + ' ';
 };
 rules.heading_close = function (tokens, idx /*, options, env */) {
   return '\n' + getBreak(tokens, idx);
@@ -144,7 +140,7 @@ rules.list_item_open = function (tokens, idx, options/*, env */) {
     for (var i = 1; i < next.children.length; i++) {
       var child = next.children[i];
       if (child.content && /^[-\w]{1,2}\./.test(child.content)) {
-        var prefix = repeat(' ', level + 2);
+        var prefix = repeat()(' ', level + 2);
         tokens[idx + 2].children[i].content = (prefix + child.content);
         tokens[idx + 2].children[i].level = level + 2;
       }
@@ -168,7 +164,7 @@ rules.list_item_open = function (tokens, idx, options/*, env */) {
   if (ordered) {
     options.chars = (rules.list.num++) + '.';
   }
-  return li(options)(level, '');
+  return li()(options)(level, '');
 };
 rules.list_item_close = function (tokens, idx/*,options, env */) {
   return getBreak(tokens, idx);
@@ -238,16 +234,16 @@ rules.image = function (tokens, idx/*, options, env */) {
   var alt = token.alt || '';
   if (link || (token.src && token.src.indexOf('badge')) !== -1) {
     if (link && link.href) {
-      return mdu.badge(alt, src, link.href);
+      return mdu().badge(alt, src, link.href);
     }
 
     var url = src;
     if (/\.(svg|jpg|png)/.test(url)) {
       url = url.slice(0, url.length - 4);
     }
-    return mdu.badge(alt, src, url);
+    return mdu().badge(alt, src, url);
   }
-  return mdu.image(alt, src, title);
+  return mdu().image(alt, src, title);
 };
 
 /**
