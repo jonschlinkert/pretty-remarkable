@@ -1,12 +1,9 @@
 {
   "name": "pretty-remarkable",
   "description": "Plugin for prettifying markdown with Remarkable using custom renderer rules.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "homepage": "https://github.com/jonschlinkert/pretty-remarkable",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": {
     "type": "git",
     "url": "git://github.com/jonschlinkert/pretty-remarkable.git"
