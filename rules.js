@@ -55,13 +55,6 @@ rules.fence = function (tokens, idx, options, env, self) {
   var token = tokens[idx], fenceName;
 
   if (token.params) {
-    //
-    // ```foo bar
-    //
-    // Try custom renderer "foo" first. That will simplify overwrite
-    // for diagrams, latex, and any other fenced block with custom look
-    //
-
     var i = token.params.indexOf(' ');
     if (i === -1) i = token.params.length;
     fenceName = token.params.slice(0, i);
@@ -71,7 +64,8 @@ rules.fence = function (tokens, idx, options, env, self) {
     }
   }
 
-  token.content = token.content.split('\n').filter(Boolean).join('\n');
+  token.content = token.content.replace(/^\n+/, '');
+  token.content = token.content.replace(/\n+$/, '');
 
   var res = '\n';
   res += '```' + (fenceName || '') + '\n';
