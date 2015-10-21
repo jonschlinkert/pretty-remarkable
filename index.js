@@ -11,7 +11,7 @@
  * Local dependencies
  */
 
-var rules = require('./rules');
+var rules = require('./lib/rules');
 
 /**
  * Register as a plugin by passing `prettify` to remarkable's
@@ -51,8 +51,9 @@ function prettify(md) {
         str += _rules[tokens[i].type](tokens, i, options, env, this);
       }
     }
+
     str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
-    return str.trim();
+    return str;
   };
 }
 
