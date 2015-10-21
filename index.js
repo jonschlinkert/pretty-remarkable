@@ -53,6 +53,7 @@ function prettify(md) {
     }
 
     str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
+    str = str.trim() + options.newline ? '\n' : '';
     return str;
   };
 }
