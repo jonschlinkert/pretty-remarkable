@@ -51,9 +51,8 @@ function prettify(md) {
         str += _rules[tokens[i].type](tokens, i, options, env, this);
       }
     }
-
     str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
-    str = str.trim() + options.newline ? '\n' : '';
+    str = str.trim() + (options.newline ? '\n' : '');
     return str;
   };
 }
