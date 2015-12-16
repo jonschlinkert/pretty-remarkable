@@ -4,17 +4,15 @@
   "version": "0.1.8",
   "homepage": "https://github.com/jonschlinkert/pretty-remarkable",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/pretty-remarkable.git"
-  },
+  "repository": "jonschlinkert/pretty-remarkable",
   "bugs": {
     "url": "https://github.com/jonschlinkert/pretty-remarkable/issues"
   },
   "license": "MIT",
   "files": [
     "index.js",
-    "rules.js"
+    "lib/rules.js",
+    "lib/utils.js"
   ],
   "main": "index.js",
   "engines": {
@@ -24,25 +22,37 @@
     "test": "mocha"
   },
   "dependencies": {
-    "lazy-cache": "^0.1.0",
-    "list-item": "^0.1.2",
-    "markdown-utils": "^0.7.0",
+    "lazy-cache": "^1.0.2",
+    "list-item": "^1.0.1",
+    "markdown-utils": "^0.7.1",
     "repeat-string": "^1.5.2"
   },
   "devDependencies": {
     "mocha": "*",
-    "remarkable": "^1.6.0",
-    "should": "*"
+    "remarkable": "^1.6.0"
   },
   "keywords": [
-    "plugin",
     "beautify",
     "format",
     "markdown",
     "marked",
     "md",
+    "plugin",
     "prettify",
     "pretty",
     "remarkable"
-  ]
+  ],
+  "verb": {
+    "related": {
+      "list": [
+        "markdown-toc",
+        "markdown-utils",
+        "prettify-markdown",
+        "remarkable"
+      ]
+    },
+    "plugins": [
+      "gulp-format-md"
+    ]
+  }
 }
