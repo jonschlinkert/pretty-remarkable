@@ -1,7 +1,7 @@
 {
   "name": "pretty-remarkable",
   "description": "Plugin for prettifying markdown with Remarkable using custom renderer rules.",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "homepage": "https://github.com/jonschlinkert/pretty-remarkable",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/pretty-remarkable",
@@ -28,8 +28,8 @@
     "repeat-string": "^1.5.2"
   },
   "devDependencies": {
-    "mocha": "*",
-    "remarkable": "^1.6.0"
+    "remarkable": "^1.6.1",
+    "mocha": "*"
   },
   "keywords": [
     "beautify",
