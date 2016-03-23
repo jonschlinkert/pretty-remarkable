@@ -28,8 +28,9 @@
     "repeat-string": "^1.5.2"
   },
   "devDependencies": {
-    "remarkable": "^1.6.1",
-    "mocha": "*"
+    "gulp-format-md": "^0.1.7",
+    "mocha": "*",
+    "remarkable": "^1.6.1"
   },
   "keywords": [
     "beautify",
@@ -43,6 +44,15 @@
     "remarkable"
   ],
   "verb": {
+    "run": true,
+    "toc": false,
+    "layout": "default",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
     "related": {
       "list": [
         "markdown-toc",
@@ -51,8 +61,11 @@
         "remarkable"
       ]
     },
-    "plugins": [
-      "gulp-format-md"
-    ]
+    "reflinks": [
+      "verb"
+    ],
+    "lint": {
+      "reflinks": true
+    }
   }
 }
