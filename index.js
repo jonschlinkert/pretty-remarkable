@@ -28,7 +28,7 @@ var rules = require('./lib/rules');
  */
 
 function prettify(md) {
-  md.renderer.renderInline = function (tokens, options, env) {
+  md.renderer.renderInline = function(tokens, options, env) {
     var _rules = rules;
     var len = tokens.length, i = 0;
     var str = '';
@@ -39,7 +39,7 @@ function prettify(md) {
     return str;
   };
 
-  md.renderer.render = function (tokens, options, env) {
+  md.renderer.render = function(tokens, options, env) {
     var _rules = rules;
     var len = tokens.length, i = -1;
     var str = '';

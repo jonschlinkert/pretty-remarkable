@@ -2,7 +2,6 @@ var fs = require('fs');
 var prettify = require('./');
 var Remarkable = require('remarkable');
 
-
 function pretty(str, options) {
   return new Remarkable()
     .use(prettify)

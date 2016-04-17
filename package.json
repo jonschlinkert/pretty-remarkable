@@ -11,8 +11,7 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "lib/rules.js",
-    "lib/utils.js"
+    "lib"
   ],
   "main": "index.js",
   "engines": {
@@ -22,15 +21,15 @@
     "test": "mocha"
   },
   "dependencies": {
-    "lazy-cache": "^1.0.2",
-    "list-item": "^1.0.1",
+    "lazy-cache": "^1.0.3",
+    "list-item": "^1.1.1",
     "markdown-utils": "^0.7.1",
-    "repeat-string": "^1.5.2"
+    "repeat-string": "^1.5.4"
   },
   "devDependencies": {
     "gulp-format-md": "^0.1.7",
-    "mocha": "*",
-    "remarkable": "^1.6.1"
+    "mocha": "^2.4.5",
+    "remarkable": "^1.6.2"
   },
   "keywords": [
     "beautify",
