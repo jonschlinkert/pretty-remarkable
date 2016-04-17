@@ -45,6 +45,93 @@ pretty('\n\n\n# foo\n\n\nbar\n# baz');
 //=> '# foo\n\nbar\n\n# baz'
 ```
 
+## Formatting
+
+In addition to the formatting mentioned in the following sections:
+
+* does not modify `code` or gfm code blocks
+* ensures that an extra newline precedes gfm code blocks, since some text editors do not display proper hightlighting otherwise
+* unless `options.condense` is false, condenses 3+ newlines down to two
+
+### Tables
+
+Normalizes table formatting.
+
+**Example**
+
+```markdown
+Before
+**A**|**B**|**C**
+---:|:---|---
+a |b |c
+x |y |z
+After
+```
+
+Is normalized to:
+
+```markdown
+Before
+
+| **A** | **B** | **C** | 
+| ---: | :--- | --- |
+| a | b | c |
+| x | y | z |
+After
+```
+
+### Unordered lists
+
+Normalizes unordered lists.
+
+**Example**
+
+```markdown
+* a
+* b
+  * c
+  * d
+    * e
+    * f
+```
+
+Is normalized to:
+
+```markdown
+* a
+* b
+  - c
+  - d
+    + e
+    + f
+```
+
+### Ordered lists
+
+Normalizes ordered lists.
+
+**Example**
+
+```markdown
+1. foo
+  a. aaa
+  b. bbb
+  c. ccc
+1. bar
+1. baz
+```
+
+Is normalized to:
+
+```markdown
+1. foo
+  a. aaa
+  b. bbb
+  c. ccc
+2. bar
+3. baz
+```
+
 ## Related projects
 
 You might also be interested in these projects:
