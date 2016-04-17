@@ -98,4 +98,10 @@ describe('prettify', function() {
       assert.equal(pretty(fixture('ol')), expected('ol'));
     });
   });
+
+  describe('tables', function() {
+    it('should format tables:', function() {
+      assert.equal(pretty(fixture('table')), expected('table'));
+    });
+  });
 });
