@@ -27,7 +27,7 @@
     "repeat-string": "^1.5.4"
   },
   "devDependencies": {
-    "gulp-format-md": "^0.1.7",
+    "gulp-format-md": "^0.1.8",
     "mocha": "^2.4.5",
     "remarkable": "^1.6.2"
   },
