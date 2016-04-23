@@ -28,6 +28,12 @@ var rules = require('./lib/rules');
  */
 
 function prettify(md) {
+  var render = md.render;
+  md.render = function(str, options) {
+    str = str.split(/\]\[\]\s*\n\s*\[/).join('][]\n\n[');
+    return render.call(md, str, options);
+  };
+
   md.renderer.renderInline = function(tokens, options, env) {
     var _rules = rules;
     var len = tokens.length, i = 0;

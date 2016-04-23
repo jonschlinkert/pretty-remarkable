@@ -87,6 +87,27 @@ describe('prettify', function() {
       var str = '[![foo](https://a.b.c.svg)](http://a.b.c)';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c)');
     });
+
+    it('should use anchors with badges:', function() {
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}';
+      assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
+    });
+  });
+
+  describe('images', function() {
+    it('should resolve image reflinks:', function() {
+      assert.equal(pretty('![foo]\n\n[foo]: bar'), '![foo](bar)');
+      assert.equal(pretty('![foo]\n\n[foo]: /url'), '![foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('![foo]\n\n[foo]: /url "some title"'), '![foo](/url "some title")', 'Should work with title');
+    });
+
+    it('should resolve image reflinks with anchors:', function() {
+      assert.equal(pretty('![foo]\n\n[foo]: bar{#zzz}'), '![foo](bar#zzz)');
+      assert.equal(pretty('![foo]{#zzz}\n\n[foo]: /url'), '![foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('![foo]\n\n[foo]: /url{#zzz}'), '![foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('![foo]{#zzz}\n\n[foo]: /url "some title"'), '![foo](/url#zzz "some title")', 'Should work with title');
+      assert.equal(pretty('![foo]\n\n[foo]: /url{#zzz} "some title"'), '![foo](/url#zzz "some title")', 'Should work with title');
+    });
   });
 
   describe('reference links', function() {
@@ -120,6 +141,11 @@ describe('prettify', function() {
       assert.equal(pretty('[foo][]\n\n[foo]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
       assert.equal(pretty('[foo][]\n\n[foo]: /url{#zzz} "some title"'), '[foo](/url#zzz "some title")', 'Should work with title');
       assert.equal(pretty('[foo][]{#zzz}\n\n[foo]: /url "some title"'), '[foo](/url#zzz "some title")', 'Should work with title');
+      assert.equal(pretty('[abc123][]{#zzz}\n\n[abc123]: foo/bar'), '[abc123](foo/bar#zzz)', 'Should work with title');
+      assert.equal(pretty('[abc123][]{#zzz}\n\n[abc][]\n\n[abc123]: foo/bar'), '[abc123](foo/bar#zzz)\n\n[abc][]', 'Should work with title');
+      assert.equal(pretty('[abc][]\n\n[abc123][]{#zzz}\n\n[abc123]: foo/bar'), '[abc][]\n\n[abc123](foo/bar#zzz)', 'Should work with title');
+      assert.equal(pretty('[abc][]\n[abc123][]{#zzz}\n\n[abc123]: foo/bar'), '[abc][]\n\n[abc123](foo/bar#zzz)', 'Should work with title');
+      assert.equal(pretty('[ghi]\n[abc][]\n\n[abc123][]{#zzz}\n\n[abc123]: foo/bar'), '[ghi]\n[abc][]\n\n[abc123](foo/bar#zzz)', 'Should work with title');
     });
 
     it('should resolve full reflinks:', function() {
@@ -165,9 +191,19 @@ describe('prettify', function() {
       assert.equal(pretty(str), '[foo](https://a.b.c.svg#zzz)');
     });
 
+    it('should format link anchors with text:', function() {
+      var str = '[jkl](mno "this is text"){#foo}';
+      assert.equal(pretty(str), '[jkl](mno#foo "this is text")');
+    });
+
     it('should format image links:', function() {
       var str = '[![foo](https://a.b.c.svg)](http://a.b.c)';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c)');
+    });
+
+    it('should format image links with titles:', function() {
+      var str = '[![foo](https://a.b.c.svg "this is a title")](http://a.b.c)';
+      assert.equal(pretty(str), '[![foo](https://a.b.c.svg "this is a title")](http://a.b.c)');
     });
 
     it('should format image link anchors:', function() {
