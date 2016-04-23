@@ -89,6 +89,98 @@ describe('prettify', function() {
     });
   });
 
+  describe('reference links', function() {
+    it('should resolve shortcut reflinks:', function() {
+      assert.equal(pretty('[foo]\n\n[foo]: bar'), '[foo](bar)');
+      assert.equal(pretty('[foo]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo]\n\n[foo]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+    });
+
+    it('should resolve shortcut reflink anchors:', function() {
+      assert.equal(pretty('[foo]{#zzz}\n\n[foo]: bar'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo]\n\n[foo]: bar{#zzz}'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo]{#zzz}\n\n[foo]: /url'), '[foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('[foo]\n\n[foo]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+    });
+
+    it('should resolve collapsed reflinks:', function() {
+      assert.equal(pretty('[foo][]\n\n[foo]: bar'), '[foo](bar)');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+    });
+
+    it('should resolve collapsed reflink anchors:', function() {
+      assert.equal(pretty('[foo][]\n\n[foo]: bar'), '[foo](bar)');
+      assert.equal(pretty('[foo][]{#zzz}\n\n[foo]: bar'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo][]\n\n[foo]: bar{#zzz}'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][]{#zzz}\n\n[foo]: /url'), '[foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url{#zzz}'), '[foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+      assert.equal(pretty('[foo][]\n\n[foo]: /url{#zzz} "some title"'), '[foo](/url#zzz "some title")', 'Should work with title');
+      assert.equal(pretty('[foo][]{#zzz}\n\n[foo]: /url "some title"'), '[foo](/url#zzz "some title")', 'Should work with title');
+    });
+
+    it('should resolve full reflinks:', function() {
+      assert.equal(pretty('[foo][foo]\n\n[foo]: bar'), '[foo](bar)');
+      assert.equal(pretty('[foo][foo]{#zzz}\n\n[foo]: bar'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo][foo]\n\n[foo]: bar{#zzz}'), '[foo](bar#zzz)');
+      assert.equal(pretty('[foo][bar]\n\n[bar]: baz'), '[foo](baz)');
+      assert.equal(pretty('[foo][foo]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][foo]{#zzz}\n\n[foo]: /url'), '[foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][foo]\n\n[foo]: /url{#zzz}'), '[foo](/url#zzz)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][bar]\n\n[bar]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+      assert.equal(pretty('[foo][foo]\n\n[foo]: /url'), '[foo](/url)', 'Should work with absolute url');
+      assert.equal(pretty('[foo][bar]\n\n[bar]: /url "some title"'), '[foo](/url "some title")', 'Should work with title');
+    });
+  });
+
+  describe('reference links context', function() {
+    it('should resolve shortcut reflinks from the context', function() {
+      var opts = { context: {reflinks: {foo: 'bar'}}}
+      assert.equal(pretty('[foo] whatever', opts), '[foo](bar) whatever');
+    });
+
+    it('should resolve shortcut reflinks with anchors from the context', function() {
+      var opts = { context: {reflinks: {foo: 'bar'}}}
+      assert.equal(pretty('[foo]{#zzz} whatever', opts), '[foo](bar#zzz) whatever');
+    });
+
+    it('should resolve collapsed reflinks from the context', function() {
+      var opts = { context: {reflinks: {foo: 'bar'}}}
+      assert.equal(pretty('[foo][] whatever', opts), '[foo](bar) whatever');
+      assert.equal(pretty('[foo][]{#zzz} whatever', opts), '[foo](bar#zzz) whatever');
+    });
+  });
+
+  describe('links', function() {
+    it('should format links:', function() {
+      var str = '[foo](https://a.b.c.svg)';
+      assert.equal(pretty(str), '[foo](https://a.b.c.svg)');
+    });
+
+    it('should format link anchors:', function() {
+      var str = '[foo](https://a.b.c.svg){#zzz}';
+      assert.equal(pretty(str), '[foo](https://a.b.c.svg#zzz)');
+    });
+
+    it('should format image links:', function() {
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c)';
+      assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c)');
+    });
+
+    it('should format image link anchors:', function() {
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}';
+      assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
+    });
+
+    it('should append anchors to image link urls', function() {
+      assert.equal(pretty('[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}'), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
+      assert.equal(pretty('[![foo](bar)](baz){#zzz}'), '[![foo](bar)](baz#zzz)');
+    });
+  });
+
   describe('lists', function() {
     it('should format unordered lists:', function() {
       assert.equal(pretty(fixture('ul')), expected('ul'));
