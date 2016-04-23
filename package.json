@@ -21,9 +21,9 @@
     "test": "mocha"
   },
   "dependencies": {
-    "lazy-cache": "^1.0.3",
+    "lazy-cache": "^1.0.4",
     "list-item": "^1.1.1",
-    "markdown-utils": "^0.7.1",
+    "markdown-utils": "^0.7.3",
     "repeat-string": "^1.5.4"
   },
   "devDependencies": {
