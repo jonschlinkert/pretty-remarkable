@@ -2,6 +2,7 @@
 
 require('mocha');
 var fs = require('fs');
+var path = require('path');
 var assert = require('assert');
 var Remarkable = require('remarkable');
 var prettify = require('..');
@@ -14,14 +15,15 @@ function pretty(str, options) {
     .use(prettify)
     .render(str);
 }
-function read(dir, name) {
-  return fs.readFileSync(dir + '/' + name + '.md', 'utf8');
+function read(cwd, name) {
+  var fp = path.resolve(path.resolve(__dirname, cwd), name + '.md');
+  return fs.readFileSync(fp, 'utf8');
 }
 function fixture(name) {
-  return read('test/fixtures', name);
+  return read('fixtures', name);
 }
 function expected(name) {
-  return read('test/expected', name);
+  return read('expected', name);
 }
 
 describe('prettify', function() {
