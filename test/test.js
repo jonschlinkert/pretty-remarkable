@@ -183,6 +183,11 @@ describe('prettify', function() {
   });
 
   describe('links', function() {
+    it('should convert empty hrefs to anchors', function() {
+      var str = '[foo]()';
+      assert.equal(pretty(str), '[foo](#foo)');
+    });
+
     it('should format links:', function() {
       var str = '[foo](https://a.b.c.svg)';
       assert.equal(pretty(str), '[foo](https://a.b.c.svg)');
