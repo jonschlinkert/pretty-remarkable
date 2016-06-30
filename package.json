@@ -21,14 +21,14 @@
     "test": "mocha"
   },
   "dependencies": {
-    "lazy-cache": "^1.0.4",
+    "lazy-cache": "^2.0.1",
     "list-item": "^1.1.1",
     "markdown-utils": "^0.7.3",
     "repeat-string": "^1.5.4"
   },
   "devDependencies": {
-    "gulp-format-md": "^0.1.8",
-    "mocha": "^2.4.5",
+    "gulp-format-md": "^0.1.9",
+    "mocha": "^2.5.3",
     "remarkable": "^1.6.2"
   },
   "keywords": [
@@ -61,7 +61,8 @@
       ]
     },
     "reflinks": [
-      "verb"
+      "verb",
+      "verb-readme-generator"
     ],
     "lint": {
       "reflinks": true
