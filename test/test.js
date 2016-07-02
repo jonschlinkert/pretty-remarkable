@@ -94,6 +94,11 @@ describe('prettify', function() {
       var str = '[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
     });
+
+    it('should use paths with badges:', function() {
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){/zzz}';
+      assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c/zzz)');
+    });
   });
 
   describe('images', function() {
