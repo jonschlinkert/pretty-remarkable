@@ -4,6 +4,7 @@ require('mocha');
 var fs = require('fs');
 var path = require('path');
 var assert = require('assert');
+var extend = require('extend-shallow');
 var Remarkable = require('remarkable');
 var prettify = require('..');
 
@@ -11,7 +12,8 @@ var prettify = require('..');
  * test utils
  */
 function pretty(str, options) {
-  return new Remarkable(options)
+  var opts = extend({newline: false}, options);
+  return new Remarkable(opts)
     .use(prettify)
     .render(str);
 }
@@ -27,6 +29,23 @@ function expected(name) {
 }
 
 describe('prettify', function() {
+  describe('api', function() {
+    it('should export a function', function() {
+      assert.equal(typeof pretty, 'function');
+    });
+
+    it('should throw an error when invalid args are passed', function(cb) {
+      try {
+        pretty();
+        cb(new Error('expected an error'));
+      } catch (err) {
+        assert(err);
+        assert.equal(err.message, 'expected a string');
+        cb();
+      }
+    });
+  });
+
   describe('newlines', function() {
     it('should strip leading newlines:', function() {
       assert.equal(pretty('\n\n\nb'), 'b');

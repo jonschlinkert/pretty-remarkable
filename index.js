@@ -11,6 +11,7 @@
  * Local dependencies
  */
 
+var expand = require('expand-reflinks');
 var rules = require('./lib/rules');
 
 /**
@@ -30,6 +31,7 @@ var rules = require('./lib/rules');
 function prettify(md) {
   var render = md.render;
   md.render = function(str, options) {
+    str = expand(str, options);
     str = str.split(/\]\[\]\s*\n\s*\[/).join('][]\n\n[');
     return render.call(md, str, options);
   };
@@ -61,7 +63,15 @@ function prettify(md) {
     if (options.condense !== false) {
       str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
     }
-    str = str.trim() + (options.newline ? '\n' : '');
+
+    var newline = '\n';
+    if (options.newline === false) {
+      newline = '';
+    }
+    if (typeof options.newline === 'string') {
+      newline = options.newline;
+    }
+    str = str.trim() + newline;
     return str;
   };
 }
@@ -71,3 +81,4 @@ function prettify(md) {
  */
 
 module.exports = prettify;
+module.exports.expand = expand;
