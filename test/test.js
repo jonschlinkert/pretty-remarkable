@@ -1,24 +1,23 @@
 'use strict';
 
 require('mocha');
-var fs = require('fs');
-var path = require('path');
-var assert = require('assert');
-var extend = require('extend-shallow');
-var Remarkable = require('remarkable');
-var prettify = require('..');
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert');
+const Remarkable = require('remarkable');
+const prettify = require('..');
 
 /**
  * test utils
  */
 function pretty(str, options) {
-  var opts = extend({newline: false}, options);
+  const opts = Object.assign({newline: false}, options);
   return new Remarkable(opts)
     .use(prettify)
     .render(str);
 }
 function read(cwd, name) {
-  var fp = path.resolve(path.resolve(__dirname, cwd), name + '.md');
+  let fp = path.resolve(path.resolve(__dirname, cwd), name + '.md');
   return fs.readFileSync(fp, 'utf8');
 }
 function fixture(name) {
@@ -34,15 +33,8 @@ describe('prettify', function() {
       assert.equal(typeof pretty, 'function');
     });
 
-    it('should throw an error when invalid args are passed', function(cb) {
-      try {
-        pretty();
-        cb(new Error('expected an error'));
-      } catch (err) {
-        assert(err);
-        assert.equal(err.message, 'expected a string');
-        cb();
-      }
+    it('should throw an error when invalid args are passed', function() {
+      assert.throws(() => pretty(), /expected/);
     });
   });
 
@@ -110,12 +102,12 @@ describe('prettify', function() {
     });
 
     it('should use anchors with badges:', function() {
-      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}';
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c) {#zzz}';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
     });
 
     it('should use paths with badges:', function() {
-      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){/zzz}';
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c) {/zzz}';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c/zzz)');
     });
   });
@@ -218,12 +210,12 @@ describe('prettify', function() {
     });
 
     it('should format link anchors:', function() {
-      var str = '[foo](https://a.b.c.svg){#zzz}';
+      var str = '[foo](https://a.b.c.svg) {#zzz}';
       assert.equal(pretty(str), '[foo](https://a.b.c.svg#zzz)');
     });
 
     it('should format link anchors with text:', function() {
-      var str = '[jkl](mno "this is text"){#foo}';
+      var str = '[jkl](mno "this is text") {#foo}';
       assert.equal(pretty(str), '[jkl](mno#foo "this is text")');
     });
 
@@ -238,13 +230,13 @@ describe('prettify', function() {
     });
 
     it('should format image link anchors:', function() {
-      var str = '[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}';
+      var str = '[![foo](https://a.b.c.svg)](http://a.b.c) {#zzz}';
       assert.equal(pretty(str), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
     });
 
     it('should append anchors to image link urls', function() {
-      assert.equal(pretty('[![foo](https://a.b.c.svg)](http://a.b.c){#zzz}'), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
-      assert.equal(pretty('[![foo](bar)](baz){#zzz}'), '[![foo](bar)](baz#zzz)');
+      assert.equal(pretty('[![foo](https://a.b.c.svg)](http://a.b.c) {#zzz}'), '[![foo](https://a.b.c.svg)](http://a.b.c#zzz)');
+      assert.equal(pretty('[![foo](bar)](baz) {#zzz}'), '[![foo](bar)](baz#zzz)');
     });
   });
 

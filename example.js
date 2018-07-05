@@ -1,6 +1,6 @@
-var fs = require('fs');
-var prettify = require('./');
-var Remarkable = require('remarkable');
+const fs = require('fs');
+const prettify = require('./');
+const Remarkable = require('remarkable');
 
 function pretty(str, options) {
   return new Remarkable(options)

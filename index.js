@@ -1,27 +1,22 @@
 /*!
  * pretty-remarkable <https://github.com/jonschlinkert/pretty-remarkable>
  *
- * Copyright (c) 2014-2015, 2017, Jon Schlinkert.
+ * Copyright (c) 2014-2018, present, Jon Schlinkert.
  * Released under the MIT License.
  */
 
 'use strict';
 
-/**
- * Local dependencies
- */
-
-var expand = require('expand-reflinks');
-var rules = require('./lib/rules');
+const rules = require('./lib/rules');
 
 /**
  * Register as a plugin by passing `prettify` to remarkable's
  * `.use()` method.
  *
  * ```js
- * var md = new Remarkable();
+ * const md = new Remarkable();
  * md.use(prettify);
- * var result = md.render(str);
+ * const result = md.render(str);
  * ```
  *
  * @param {Object} `options`
@@ -29,17 +24,21 @@ var rules = require('./lib/rules');
  */
 
 function prettify(md) {
-  var render = md.render;
+  ast(md);
+  const render = md.render;
+
   md.render = function(str, options) {
-    str = expand(str, options);
+    if (typeof str !== 'string') {
+      throw new TypeError('expected a string');
+    }
     str = str.split(/\]\[\]\s*\n\s*\[/).join('][]\n\n[');
     return render.call(md, str, options);
   };
 
   md.renderer.renderInline = function(tokens, options, env) {
-    var _rules = rules;
-    var len = tokens.length, i = 0;
-    var str = '';
+    const _rules = rules;
+    let len = tokens.length, i = 0;
+    let str = '';
 
     while (len--) {
       str += _rules[tokens[i].type](tokens, i++, options, env, this);
@@ -48,15 +47,16 @@ function prettify(md) {
   };
 
   md.renderer.render = function(tokens, options, env) {
-    var _rules = rules;
-    var len = tokens.length, i = -1;
-    var str = '';
+    let _rules = rules;
+    let len = tokens.length, i = -1;
+    let str = '';
 
     while (++i < len) {
-      if (tokens[i].type === 'inline') {
-        str += this.renderInline(tokens[i].children, options, env);
+      let token = tokens[i];
+      if (token.type === 'inline') {
+        str += this.renderInline(token.children, options, env);
       } else {
-        str += _rules[tokens[i].type](tokens, i, options, env, this);
+        str += _rules[token.type](tokens, i, options, env, this);
       }
     }
 
@@ -64,7 +64,7 @@ function prettify(md) {
       str = str.split(/(?:\r\n|\n){2,}/).join('\n\n');
     }
 
-    var newline = '\n';
+    let newline = '\n';
     if (options.newline === false) {
       newline = '';
     }
@@ -76,9 +76,75 @@ function prettify(md) {
   };
 }
 
+function ast(md) {
+  let parse = md.parse;
+
+  md.parse = function(str, options) {
+    let tokens = parse.apply(md, arguments);
+    let ast = {type: 'root', nodes: []};
+    let nodes = [ast];
+    let stack = [];
+
+    function last() {
+      return stack.length ? stack[stack.length - 1] : nodes[nodes.length - 1];
+    }
+
+    visit({nodes: tokens}, function(tok) {
+      if (tok.children) {
+        define(tok, 'children', tok.children);
+      }
+
+      let prev = last();
+      let match = parseType(tok);
+      if (match) {
+        if (match[2] === 'open') {
+          let node = {type: match[1], nodes: [tok]};
+          define(tok, 'parent', node);
+          define(node, 'parent', prev);
+          prev.nodes.push(node);
+          stack.push(node);
+        } else {
+          let parent = stack.pop();
+          define(tok, 'parent', parent);
+          parent.nodes.push(tok);
+        }
+      } else {
+        define(tok, 'parent', prev);
+        if (tok.type !== 'inline') {
+          prev.nodes.push(tok);
+        }
+      }
+    });
+
+    tokens.ast = ast;
+    return tokens;
+  };
+}
+
+function parseType(tok) {
+  return /(.*?)_(open|close)$/.exec(tok.type);
+}
+
+function visit(node, fn) {
+  fn(node);
+  if (node.nodes || node.children) {
+    mapVisit(node, fn);
+  }
+}
+
+function mapVisit(node, fn) {
+  var nodes = node.nodes || node.children;
+  for (var i = 0; i < nodes.length; i++) {
+    visit(nodes[i], fn);
+  }
+}
+
+function define(obj, key, value) {
+  Reflect.defineProperty(obj, key, { value });
+}
+
 /**
  * expose `prettify`
  */
 
 module.exports = prettify;
-module.exports.expand = expand;
